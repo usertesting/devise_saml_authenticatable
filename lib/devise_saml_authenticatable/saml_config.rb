@@ -20,7 +20,16 @@ module DeviseSamlAuthenticatable
     end
 
     def adapter_based_config(idp_entity_id)
-      OneLogin::RubySaml::Settings.new(Devise.idp_settings_adapter.settings(idp_entity_id))
+      config = Marshal.load(Marshal.dump(Devise.saml_config))
+
+      Devise.idp_settings_adapter.settings(idp_entity_id).each do |k,v|
+        acc = "#{k.to_s}=".to_sym
+
+        if config.respond_to? acc
+          config.send(acc, v)
+        end
+      end
+      config
     end
   end
 end
